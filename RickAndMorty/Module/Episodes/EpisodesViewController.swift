@@ -184,7 +184,6 @@ final class EpisodesViewController: UIViewController {
                     viewModel.addFavourite(episodeId: episodeId)
                 } else {
                     viewModel.removeFavourite(episodeId: episodeId)
-//                    viewModel.getFavouriteEpisodes()
                 }
                 updateCollection(with: viewModel.episodes)
             }
