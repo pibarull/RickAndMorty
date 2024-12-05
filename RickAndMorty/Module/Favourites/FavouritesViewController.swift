@@ -9,10 +9,6 @@ import UIKit
 import SnapKit
 import RxSwift
 
-//enum Section {
-//    case main
-//}
-
 final class FavouritesViewController: UIViewController {
 
     private var collectionView: UICollectionView
@@ -38,7 +34,8 @@ final class FavouritesViewController: UIViewController {
         super.viewWillAppear(animated)
 
         navigationController?.setNavigationBarHidden(true, animated: animated)
-//        viewModel.getFavouriteEpisodes()
+        viewModel.getFavouriteEpisodes()
+        updateCollection(with: viewModel.favouriteEpisodes)
     }
 
     override func viewDidLoad() {
@@ -91,6 +88,7 @@ final class FavouritesViewController: UIViewController {
             cell.configure(with: episodes[indexPath.row])
             return cell
         }
+        collectionView.dataSource = dataSource
     }
 
     private func setupLayout() {

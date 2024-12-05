@@ -85,6 +85,13 @@ final class EpisodeCell: UICollectionViewCell {
         }
     }
 
+    func startLoading() {
+        titleLabel.text = nil
+        imageView.image = UIImage(named: "LaunchLoading")
+        footerTitle.text = nil
+        imageView.rotate()
+    }
+
     private func setupUI() {
         backgroundColor = .white
 

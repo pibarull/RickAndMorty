@@ -8,7 +8,7 @@
 import Foundation
 
 enum RmAPI {
-    case episodes
+    case episodes(page: Int? = nil)
     case episodesByEpisode(episodeNumber: String)
     case episodesByName(name: String)
     case character(id: Int)
@@ -26,8 +26,12 @@ extension RmAPI {
 
     var path: String {
         switch self {
-        case .episodes:
-            return "/episode"
+        case .episodes(let page):
+            if let page = page {
+                return "/episode/?page=\(page)"
+            } else {
+                return "/episode"
+            }
         case .episodesByEpisode(let episodeNumber):
             return "/episode/?episode=\(episodeNumber)"
         case .episodesByName(let name):

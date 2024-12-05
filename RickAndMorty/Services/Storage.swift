@@ -22,18 +22,10 @@ final class Storage {
 
     func addFavourite(by episodeId: Int) {
         episodes.first(where: { $0.id == episodeId })?.isFavourite = true
-//        if var episode = episodes.first(where: { $0.id == episodeId }) {
-//            episode.isFavourite = true
-////            favouriteEpisodes.append(episode)
-//        }
     }
 
     func removeFavourite(by episodeId: Int) {
         episodes.first(where: { $0.id == episodeId })?.isFavourite = false
-//        if var episode = episodes.first(where: { $0.id == episodeId }) {
-//            episode.isFavourite = false
-//        }
-//        favouriteEpisodes.removeAll(where: { $0.id == episodeId })
     }
 
     func getFavouriteEpisodes() -> [EpisodeFull] {

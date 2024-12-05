@@ -13,6 +13,8 @@ enum Section {
     case main
 }
 
+typealias Snapshot = NSDiffableDataSourceSnapshot<Section, EpisodeFull>
+
 final class EpisodesViewController: UIViewController {
 
     private var collectionView: UICollectionView
@@ -48,7 +50,7 @@ final class EpisodesViewController: UIViewController {
         super.viewDidLoad()
 
         Task {
-            await viewModel.getEpisodes()
+            await viewModel.getEpisodes(by: .all)
             firstTimeAppearance = false
         }
 
@@ -65,7 +67,7 @@ final class EpisodesViewController: UIViewController {
         loadingView.isHidden = true
         loadingView.start()
         view.addSubview(searchPicker)
-        searchPicker.backgroundColor = .gray
+        searchPicker.backgroundColor = .lightGray
         searchPicker.isHidden = true
 
         setupCollectionView()
@@ -92,15 +94,21 @@ final class EpisodesViewController: UIViewController {
         dataSource = UICollectionViewDiffableDataSource<Section, EpisodeFull>(collectionView: collectionView) { [weak self] (tableView, indexPath, episode) -> UICollectionViewCell? in
             guard let self else { return UICollectionViewCell() }
 
-            let episodes = self.viewModel.episodes
+            let episodes = viewModel.episodes
             guard let cell = self.collectionView.dequeueReusableCell(withReuseIdentifier: EpisodeCell.reuseIdentifier, for: indexPath) as? EpisodeCell,
                   !episodes.isEmpty else {
                 return UICollectionViewCell()
             }
 
-            cell.configure(with: episodes[indexPath.row])
+            if viewModel.currentPage < viewModel.totalPages && indexPath.row == viewModel.episodes.count - 1 {
+                cell.configure(with: episodes[indexPath.row])
+//                cell.startLoading
+            } else {
+                cell.configure(with: episodes[indexPath.row])
+            }
             return cell
         }
+        collectionView.dataSource = dataSource
         setupHeader()
     }
 
@@ -208,15 +216,15 @@ final class EpisodesViewController: UIViewController {
         Task {
             switch self.selectedCategory {
             case .byEpisodeNumber:
-                await self.viewModel.getEpisodes(byEpisode: searchQuery)
+                await self.viewModel.getEpisodes(by: .episodeNumber(query: searchQuery))
             case .byName:
-                await self.viewModel.getEpisodes(byName: searchQuery)
+                await self.viewModel.getEpisodes(by: .name(query: searchQuery))
             }
             
             await MainActor.run { [weak self] in
                 guard let self else { return }
                 
-                self.updateCollection(with: self.viewModel.episodes)
+                updateCollection(with: viewModel.episodes)
             }
         }
     }
@@ -281,13 +289,34 @@ final class EpisodesViewController: UIViewController {
             }
         }
     }
+
+    private func makeSnapshot() -> Snapshot {
+        var snapshot = Snapshot()
+        snapshot.appendSections([.main])
+        snapshot.appendItems(viewModel.episodes)
+        return snapshot
+    }
 }
 
 extension EpisodesViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         guard let selectedCharacter = viewModel.episodes[indexPath.row].selectedCharacter else { return }
 
-        print("Selected character: \(selectedCharacter.name)")
         openedCharacterDetails?(selectedCharacter)
+    }
+
+    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        if viewModel.currentPage < viewModel.totalPages && indexPath.row == viewModel.episodes.count - 1 {
+            viewModel.currentPage += 1
+            Task {
+                await viewModel.getEpisodes(by: .all, page: viewModel.currentPage)
+
+                await MainActor.run { [weak self] in
+                    guard let self else { return }
+                    
+                    updateCollection(with: viewModel.episodes)
+                }
+            }
+        }
     }
 }

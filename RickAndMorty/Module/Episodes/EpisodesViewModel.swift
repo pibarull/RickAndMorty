@@ -23,11 +23,13 @@ final class EpisodesViewModel {
     private let storage: Storage
 
     // Public
-    var episodes: [EpisodeFull] = []
+    lazy var episodes: [EpisodeFull] = []
     lazy var favouriteEpisodes: [EpisodeFull] = {
         storage.getFavouriteEpisodes()
     }()
     let state = BehaviorRelay<State>(value: .loading)
+    var totalPages = 1
+    var currentPage = 1
 
     init(dependencies: IDependencies) {
         self.networkService = dependencies.networkService
@@ -35,15 +37,17 @@ final class EpisodesViewModel {
     }
 
     func getFavouriteEpisodes() {
-//        episodes = storage.getFavouriteEpisodes()
         favouriteEpisodes = storage.getFavouriteEpisodes()
     }
 
-    func getEpisodes(byEpisode episodeNumber: String = "", byName name: String = "") async {
+    func getEpisodes(by category: SearchCategory, page: Int? = nil) async {
         do {
-            let result = try await networkService.getEpisodes(byEpisode: episodeNumber, byName: name)
+            let result = try await networkService.getEpisodes(by: category, page: page)
             switch result {
-            case .success(let episodes):
+            case .success(let data):
+                let episodes = data.0
+                let totalPages = data.1
+
                 let charactersFetched = try await getCharacters(for: episodes)
                 let imagesFetched = try await loadImages(for: charactersFetched)
 
@@ -52,7 +56,9 @@ final class EpisodesViewModel {
                               episodes: episodes)
 
                 // TODO: use single source for episodes - from Storage
-                storage.episodes = self.episodes
+//                storage.episodes = self.episodes
+                self.episodes = storage.episodes
+                self.totalPages = totalPages
                 state.accept(.loaded)
             case .failure(let error):
                 //Show error alert
@@ -72,7 +78,7 @@ final class EpisodesViewModel {
 
         let characters = charactersFetched.compactMap { $0 }
 
-        self.episodes = episodes.map({
+        let newEpisodes = episodes.map({
             let episode = EpisodeFull(id: $0.id,
                                       name: $0.name,
                                       episode: $0.episode,
@@ -83,13 +89,17 @@ final class EpisodesViewModel {
             return episode
         })
 
-        if characters.count == self.episodes.count {
-            for i in 0..<self.episodes.count {
+//        storage.episodes.append(contentsOf: newEpisodes)
+
+        if characters.count == newEpisodes.count {
+            for i in 0..<newEpisodes.count {
                 if let selectedImage = imagesFetched["\(characters[i].imagePath)"] {
                     let selectedCharacter = CharacterFull(character: characters[i], image: selectedImage ?? UIImage())
-                    self.episodes[i].selectedCharacter = selectedCharacter
+                    newEpisodes[i].selectedCharacter = selectedCharacter
                 }
             }
+
+            storage.episodes.append(contentsOf: newEpisodes)
         } else {
             //Show error message that not all data fetched
         }
