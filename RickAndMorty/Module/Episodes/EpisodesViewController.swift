@@ -24,6 +24,7 @@ final class EpisodesViewController: UIViewController {
     private var dataSource: UICollectionViewDiffableDataSource<Section, EpisodeFull>!
     private var firstTimeAppearance: Bool = true
     private var selectedCategory: Category = .byEpisodeNumber
+    private var addedToFavourites: ((Bool, Int) -> ())?
     private let disposeBag = DisposeBag()
 
     var openedCharacterDetails: ((CharacterFull) -> ())?
@@ -70,6 +71,17 @@ final class EpisodesViewController: UIViewController {
         searchPicker.backgroundColor = .lightGray
         searchPicker.isHidden = true
 
+        addedToFavourites = { [weak self] shouldBeAdded, episodeId in
+            guard let self = self else { return }
+            
+            if shouldBeAdded {
+                viewModel.addFavourite(episodeId: episodeId)
+            } else {
+                viewModel.removeFavourite(episodeId: episodeId)
+            }
+            updateCollection(with: viewModel.episodes)
+        }
+
         setupCollectionView()
     }
 
@@ -79,7 +91,7 @@ final class EpisodesViewController: UIViewController {
         layout.headerReferenceSize = CGSize(width: collectionView.frame.size.width, height: 300)
         collectionView.collectionViewLayout = layout
         collectionView.contentInset = UIEdgeInsets(top: -10, left: 0, bottom: 40, right: 0)
-        
+
         if let layout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout {
             layout.minimumLineSpacing = 40
             layout.itemSize = CGSize(width: self.view.frame.size.width - 52, height: 360)
@@ -100,11 +112,20 @@ final class EpisodesViewController: UIViewController {
                 return UICollectionViewCell()
             }
 
+            let episode: EpisodeFull
+
+            // Sync episode state (isFavourite/image) with stored favourite episodes
+            if let episodeFromStorage = viewModel.favouriteEpisodes.first(where: { $0.id == episodes[indexPath.row].id }) {
+                episode = episodeFromStorage
+            } else {
+                episode = episodes[indexPath.row]
+            }
+
             if viewModel.currentPage < viewModel.totalPages && indexPath.row == viewModel.episodes.count - 1 {
-                cell.configure(with: episodes[indexPath.row])
+                cell.configure(with: episode, addedToFavourites: addedToFavourites!)
 //                cell.startLoading
             } else {
-                cell.configure(with: episodes[indexPath.row])
+                cell.configure(with: episode, addedToFavourites: addedToFavourites!)
             }
             return cell
         }
@@ -141,7 +162,7 @@ final class EpisodesViewController: UIViewController {
             selectorSubscription = header.selectCategoryButton.rx.tap
                 .bind { [weak self] _ in
                     guard let self else { return }
-                    
+
                     searchPicker.isHidden = !searchPicker.isHidden
                 }
 
@@ -182,18 +203,6 @@ final class EpisodesViewController: UIViewController {
                 guard let self else { return }
 
                 self.loadingView.start()
-            }
-            .disposed(by: disposeBag)
-
-        EpisodeCell.addedToFavourites
-            .subscribe { [weak self] shouldBeAdded, episodeId in
-                guard let self = self else { return }
-                if shouldBeAdded {
-                    viewModel.addFavourite(episodeId: episodeId)
-                } else {
-                    viewModel.removeFavourite(episodeId: episodeId)
-                }
-                updateCollection(with: viewModel.episodes)
             }
             .disposed(by: disposeBag)
 
@@ -267,6 +276,7 @@ final class EpisodesViewController: UIViewController {
 
     private func updateCollection(with episodes: [EpisodeFull]) {
 //        if episodes.isEmpty -> show no results view for Favourites screen
+        // Have this 👆 logic in VM
 
         if firstTimeAppearance {
             var snapshot = NSDiffableDataSourceSnapshot<Section, EpisodeFull>()
@@ -300,7 +310,15 @@ final class EpisodesViewController: UIViewController {
 
 extension EpisodesViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        guard let selectedCharacter = viewModel.episodes[indexPath.row].selectedCharacter else { return }
+        //Sync with stored favourites to pass correct character to Character Screen
+        let episode: EpisodeFull
+        if let episodeFromStorage = viewModel.favouriteEpisodes.first(where: { $0.id == viewModel.episodes[indexPath.row].id }) {
+            episode = episodeFromStorage
+        } else {
+            episode = viewModel.episodes[indexPath.row]
+        }
+
+        guard let selectedCharacter = episode.selectedCharacter else { return }
 
         openedCharacterDetails?(selectedCharacter)
     }

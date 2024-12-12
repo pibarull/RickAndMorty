@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Episode: Decodable, Identifiable {
+struct Episode: Codable, Identifiable {
     let id: Int
     let name: String
     let episode: String
@@ -16,7 +16,7 @@ struct Episode: Decodable, Identifiable {
     let created: String
 }
 
-class EpisodeFull: Hashable {
+class EpisodeFull: Hashable, Codable {
 
     static func == (lhs: EpisodeFull, rhs: EpisodeFull) -> Bool {
         return lhs.id == rhs.id &&

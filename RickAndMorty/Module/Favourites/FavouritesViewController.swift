@@ -15,6 +15,7 @@ final class FavouritesViewController: UIViewController {
     private let viewModel: EpisodesViewModel
     private var dataSource: UICollectionViewDiffableDataSource<Section, EpisodeFull>!
     private var firstTimeAppearance: Bool = true
+    private var addedToFavourites: ((Bool, Int) -> ())?
     private let disposeBag = DisposeBag()
 
     var openedCharacterDetails: ((CharacterFull) -> ())?
@@ -34,7 +35,6 @@ final class FavouritesViewController: UIViewController {
         super.viewWillAppear(animated)
 
         navigationController?.setNavigationBarHidden(true, animated: animated)
-        viewModel.getFavouriteEpisodes()
         updateCollection(with: viewModel.favouriteEpisodes)
     }
 
@@ -44,7 +44,7 @@ final class FavouritesViewController: UIViewController {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
 
-            self.updateCollection(with: self.viewModel.favouriteEpisodes)
+            updateCollection(with: viewModel.favouriteEpisodes)
             firstTimeAppearance = false
         }
 
@@ -56,6 +56,17 @@ final class FavouritesViewController: UIViewController {
     private func setupUI() {
         view.backgroundColor = .white
         view.addSubview(collectionView)
+
+        addedToFavourites = { [weak self] shouldBeAdded, episodeId in
+            guard let self = self else { return }
+            
+            if shouldBeAdded {
+                viewModel.addFavourite(episodeId: episodeId)
+            } else {
+                viewModel.removeFavourite(episodeId: episodeId)
+            }
+            updateCollection(with: viewModel.favouriteEpisodes)
+        }
 
         setupCollectionView()
     }
@@ -79,13 +90,13 @@ final class FavouritesViewController: UIViewController {
         dataSource = UICollectionViewDiffableDataSource<Section, EpisodeFull>(collectionView: collectionView) { [weak self] (tableView, indexPath, episode) -> UICollectionViewCell? in
             guard let self else { return UICollectionViewCell() }
 
-            let episodes = self.viewModel.favouriteEpisodes
-            guard let cell = self.collectionView.dequeueReusableCell(withReuseIdentifier: EpisodeCell.reuseIdentifier, for: indexPath) as? EpisodeCell,
+            let episodes = viewModel.favouriteEpisodes
+            guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: EpisodeCell.reuseIdentifier, for: indexPath) as? EpisodeCell,
                   !episodes.isEmpty else {
                 return UICollectionViewCell()
             }
 
-            cell.configure(with: episodes[indexPath.row])
+            cell.configure(with: episodes[indexPath.row], addedToFavourites: addedToFavourites!)
             return cell
         }
         collectionView.dataSource = dataSource
@@ -97,20 +108,7 @@ final class FavouritesViewController: UIViewController {
         }
     }
 
-    private func setupRx() {
-        EpisodeCell.addedToFavourites
-            .subscribe { [weak self] shouldBeAdded, episodeId in
-                guard let self = self else { return }
-                if shouldBeAdded {
-                    viewModel.addFavourite(episodeId: episodeId)
-                } else {
-                    viewModel.removeFavourite(episodeId: episodeId)
-                    viewModel.getFavouriteEpisodes()
-                }
-                updateCollection(with: viewModel.favouriteEpisodes)
-            }
-            .disposed(by: disposeBag)
-    }
+    private func setupRx() {}
 
     private func configureCollection(with episodes: [EpisodeFull]) {
         var snapshot = NSDiffableDataSourceSnapshot<Section, EpisodeFull>()
@@ -121,6 +119,7 @@ final class FavouritesViewController: UIViewController {
 
     private func updateCollection(with episodes: [EpisodeFull]) {
 //        if episodes.isEmpty -> show no results view for Favourites screen
+        // Have this 👆 logic in VM
 
         if firstTimeAppearance {
             var snapshot = NSDiffableDataSourceSnapshot<Section, EpisodeFull>()

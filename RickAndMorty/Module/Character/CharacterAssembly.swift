@@ -8,7 +8,7 @@
 import UIKit
 
 final class CharacterAssembly {
-    static func configure(_ dependencies: IDependencies) -> UIViewController {
-        return dependencies.container.getCharacterViewController()
+    static func configure(_ dependencies: IDependencies, character: CharacterFull) -> UIViewController {
+        return dependencies.container.getCharacterViewController(character: character)
     }
 }

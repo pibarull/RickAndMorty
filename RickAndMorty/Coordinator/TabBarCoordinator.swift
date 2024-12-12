@@ -27,10 +27,15 @@ class TabBarCoordinator: Coordinator {
         if let tabBarController = tabBarController as? TabBarController {
             
             tabBarController.viewControllers?.forEach({ vc in
-                if let navVC = vc as? UINavigationController,
-                   let episodesViewController = navVC.viewControllers.first as? EpisodesViewController {
-                    episodesViewController.openedCharacterDetails = { [weak self] character in
-                        self?.showCharacterViewController(for: character, from: navVC)
+                if let navVC = vc as? UINavigationController {
+                    if let episodesViewController = navVC.viewControllers.first as? EpisodesViewController {
+                        episodesViewController.openedCharacterDetails = { [weak self] character in
+                            self?.showCharacterViewController(for: character, from: navVC)
+                        }
+                    } else if let favouritesViewController = navVC.viewControllers.first as? FavouritesViewController {
+                        favouritesViewController.openedCharacterDetails = { [weak self] character in
+                            self?.showCharacterViewController(for: character, from: navVC)
+                        }
                     }
                 }
             })
@@ -54,12 +59,11 @@ class TabBarCoordinator: Coordinator {
     }
 
     func showCharacterViewController(for character: CharacterFull, from navigationController: UINavigationController) {
-        let characterViewController = CharacterAssembly.configure(dependencies)
+        let characterViewController = CharacterAssembly.configure(dependencies, character: character)
         if let characterViewController = characterViewController as? CharacterViewController {
             characterViewController.dismiss = { [weak self] in
-                navigationController.dismiss(animated: true) {
-                    self?.finish()
-                }
+                navigationController.popViewController(animated: true)
+                self?.finish()
             }
         }
         navigationController.show(characterViewController, sender: self)

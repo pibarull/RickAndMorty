@@ -15,8 +15,8 @@ import RxGesture
 final class EpisodeCell: UICollectionViewCell {
 
     static let reuseIdentifier = "EpisodeCell"
-    // Should I use???
-    static let addedToFavourites = PublishSubject<(Bool, Int)>()
+
+    private var addedToFavourites: ((Bool, Int) -> ())?
 
     private let containerView = UIView()
     private let clippingView = UIView()
@@ -71,18 +71,19 @@ final class EpisodeCell: UICollectionViewCell {
         fatalError("init(coder:) has not been implemented")
     }
 
-    func configure(with episode: EpisodeFull) {
+    func configure(with episode: EpisodeFull, addedToFavourites: @escaping ((Bool, Int) -> ())) {
         if episode.id == -404 {
             titleLabel.text = "Error: Unable to fetch data"
             imageView.image = nil
             footerTitle.text = "Please try a new query"
         } else {
             titleLabel.text = episode.selectedCharacter?.name
-            imageView.image = episode.selectedCharacter?.image
+            imageView.image = episode.selectedCharacter?.image.image
             footerTitle.text = "\(episode.name) | \(episode.episode)"
             favouriteButton.isSelected = episode.isFavourite
             self.episode = episode
         }
+        self.addedToFavourites = addedToFavourites
     }
 
     func startLoading() {
@@ -172,11 +173,11 @@ final class EpisodeCell: UICollectionViewCell {
             .bind { [weak self] in
                 guard let self,
                 let episode = self.episode else { return }
-                
+
                 UIView.animate(withDuration: 0.5) {
                     self.favouriteButton.isSelected = !episode.isFavourite
                 }
-                EpisodeCell.addedToFavourites.onNext((self.favouriteButton.isSelected, episode.id))
+                addedToFavourites?(self.favouriteButton.isSelected, episode.id)
             }
             .disposed(by: disposeBag)
     }

@@ -24,9 +24,9 @@ final class EpisodesViewModel {
 
     // Public
     lazy var episodes: [EpisodeFull] = []
-    lazy var favouriteEpisodes: [EpisodeFull] = {
+    var favouriteEpisodes: [EpisodeFull] {
         storage.getFavouriteEpisodes()
-    }()
+    }
     let state = BehaviorRelay<State>(value: .loading)
     var totalPages = 1
     var currentPage = 1
@@ -34,10 +34,6 @@ final class EpisodesViewModel {
     init(dependencies: IDependencies) {
         self.networkService = dependencies.networkService
         self.storage = dependencies.storage
-    }
-
-    func getFavouriteEpisodes() {
-        favouriteEpisodes = storage.getFavouriteEpisodes()
     }
 
     func getEpisodes(by category: SearchCategory, page: Int? = nil) async {
@@ -189,6 +185,7 @@ final class EpisodesViewModel {
 
     func addFavourite(episodeId: Int) {
         storage.addFavourite(by: episodeId)
+//        storage?.getFavouriteEpisodes()
     }
 
     func removeFavourite(episodeId: Int) {

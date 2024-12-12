@@ -11,7 +11,7 @@ protocol IModuleContainer {
     func getLaunchViewController() -> UIViewController
     func getTabBarController() -> UIViewController
     func getEpisodesViewController() -> UIViewController
-    func getCharacterViewController() -> UIViewController
+    func getCharacterViewController(character: CharacterFull) -> UIViewController
     func getFavouritesViewController() -> UIViewController
 }
 
@@ -54,14 +54,14 @@ extension ModuleContainer {
         return tabBarController
     }
 
-    // Should I pass coordinator here?
     func getEpisodesViewController() -> UIViewController {
         let viewModel = EpisodesViewModel(dependencies: dependencies)
         return EpisodesViewController(viewModel: viewModel)
     }
 
-    func getCharacterViewController() -> UIViewController {
-        return CharacterViewController()
+    func getCharacterViewController(character: CharacterFull) -> UIViewController {
+        let viewModel = CharacterViewModel(dependencies: dependencies, character: character)
+        return CharacterViewController(viewModel: viewModel)
     }
 
     func getFavouritesViewController() -> UIViewController {

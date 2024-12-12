@@ -28,7 +28,7 @@ struct Character: Decodable {
     }
 }
 
-struct CharacterFull: Hashable {
+struct CharacterFull: Hashable, Codable {
     let id: Int
     let name: String
     let status: String
@@ -40,7 +40,7 @@ struct CharacterFull: Hashable {
     let episode: [String]
     let url: String
     let created: String
-    let image: UIImage
+    let image: Data
 
     init(character: Character, image: UIImage) {
         self.id = character.id
@@ -54,16 +54,16 @@ struct CharacterFull: Hashable {
         self.episode = character.episode
         self.url = character.url
         self.created = character.created
-        self.image = image
+        self.image = image.data! // ???
     }
 }
 
-struct CharacterLocation: Decodable, Hashable {
+struct CharacterLocation: Codable, Hashable {
     let name: String
     let url: String
 }
 
-struct CharacterOrigin: Decodable, Hashable {
+struct CharacterOrigin: Codable, Hashable {
     let name: String
     let url: String
 }
