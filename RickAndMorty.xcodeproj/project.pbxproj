@@ -599,7 +599,9 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = XHGFK98S7U;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = RickAndMorty/Info.plist;
+				INFOPLIST_FILE = "RickAndMorty/Supporting files/Info.plist";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Это необходимо, чтобы сканировать штрихкоды, номер карты и использовать другие возиожности.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Это необходимо для добавления ваших фотографий.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen.storyboard;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
@@ -626,7 +628,9 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = XHGFK98S7U;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = RickAndMorty/Info.plist;
+				INFOPLIST_FILE = "RickAndMorty/Supporting files/Info.plist";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Это необходимо, чтобы сканировать штрихкоды, номер карты и использовать другие возиожности.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Это необходимо для добавления ваших фотографий.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen.storyboard;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;

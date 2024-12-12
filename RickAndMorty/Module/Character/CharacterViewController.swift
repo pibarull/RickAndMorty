@@ -8,6 +8,8 @@
 import UIKit
 import SnapKit
 import RxSwift
+import AVFoundation
+import Photos
 
 final class CharacterViewController: UIViewController {
 
@@ -101,10 +103,74 @@ final class CharacterViewController: UIViewController {
             .subscribe { [weak self] _ in
                 guard let self else { return }
 
-                print("Camera button pressed")
-                //Open camera/gallery
+                let actionSheet = UIAlertController(title: "Загрузите изображение", message: nil, preferredStyle: .actionSheet)
+                let cameraAction = UIAlertAction(title: "Камера", style: .default) { [weak self] _ in
+                    // Can be moved to a separate manager class like `CameraManager`
+                    self?.checkCameraAccess()
+                }
+                let galleryAction = UIAlertAction(title: "Галерея", style: .default) { [weak self] _ in
+                    self?.checkPhotoLibraryAccess()
+                }
+
+                let cancelAction = UIAlertAction(title: "Отмена", style: .cancel, handler: nil)
+
+                actionSheet.addAction(cameraAction)
+                actionSheet.addAction(galleryAction)
+                actionSheet.addAction(cancelAction)
+                self.present(actionSheet, animated: true, completion: nil)
             }
             .disposed(by: disposeBag)
+    }
+
+    private func checkCameraAccess() {
+        let authorizationStatus = AVCaptureDevice.authorizationStatus(for: .video)
+        switch authorizationStatus {
+        case .notDetermined:
+            AVCaptureDevice.requestAccess(for: .video) { granted in
+                if granted {
+                    // Open camera to take a photo
+                } else {
+                    // Dismiss the alert
+                }
+            }
+        case .authorized:
+            print()
+            // Open camera to take a photo
+        case .denied, .restricted:
+            if let settingsURL = URL(string: UIApplication.openSettingsURLString) {
+                if UIApplication.shared.canOpenURL(settingsURL) {
+                    UIApplication.shared.open(settingsURL)
+                }
+            }
+        @unknown default:
+            print("Unknown camera authorization status")
+        }
+    }
+
+    private func checkPhotoLibraryAccess() {
+        let authorizationStatus = PHPhotoLibrary.authorizationStatus()
+        switch authorizationStatus {
+        case .notDetermined:
+            // Request access if not determined
+            PHPhotoLibrary.requestAuthorization { status in
+                if status == .authorized {
+                    // Open gallery to choose a photo
+                } else {
+                    // Dismiss the alert
+                }
+            }
+        case .restricted, .denied:
+            if let settingsURL = URL(string: UIApplication.openSettingsURLString) {
+                if UIApplication.shared.canOpenURL(settingsURL) {
+                    UIApplication.shared.open(settingsURL)
+                }
+            }
+        case .authorized, .limited:
+            print()
+            // Open gallery to choose a photo
+        @unknown default:
+            print("Unknown Photo Library authorization status")
+        }
     }
 }
 
