@@ -37,7 +37,7 @@ final class CharacterCell: UITableViewCell {
         super.init(coder: aDecoder)
     }
 
-    func configure(with data: CharacterViewModel.CellData, image: UIImage) {
+    func configure(with data: CharacterViewModel.CellData) {
         titleLabel.text = data.0
         subtitleLabel.text = data.1
     }

@@ -56,6 +56,21 @@ struct CharacterFull: Hashable, Codable {
         self.created = character.created
         self.image = image.data! // ???
     }
+
+    init(character: CharacterFull, image: UIImage) {
+        self.id = character.id
+        self.name = character.name
+        self.status = character.status
+        self.species = character.species
+        self.type = character.type
+        self.gender = character.gender
+        self.origin = character.origin
+        self.location = character.location
+        self.episode = character.episode
+        self.url = character.url
+        self.created = character.created
+        self.image = image.data! // ???
+    }
 }
 
 struct CharacterLocation: Codable, Hashable {

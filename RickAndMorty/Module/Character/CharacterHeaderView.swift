@@ -64,7 +64,11 @@ final class CharacterHeaderView: UIView {
     required init?(coder: NSCoder) {
         super.init(coder: coder)
     }
-    
+
+    func updateImage(with image: UIImage) {
+        characterImageView.image = image
+    }
+
     private func setupUI() {
         addSubview(characterImageView)
         addSubview(cameraButton)

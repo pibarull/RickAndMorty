@@ -11,17 +11,18 @@ import RxSwift
 import AVFoundation
 import Photos
 
-final class CharacterViewController: UIViewController {
+final class CharacterViewController: UIViewController, UINavigationControllerDelegate {
 
     // Call when user tap on back arrow in navigation tab
     var dismiss: (() -> ())?
+    var openedCharacterDetails: ((CharacterFull) -> ())?
+    var imagePicker = UIImagePickerController()
+
     private var tableView: UITableView
     private var headerView: CharacterHeaderView?
     private let viewModel: CharacterViewModel
     private var firstTimeAppearance: Bool = true
     private let disposeBag = DisposeBag()
-
-    var openedCharacterDetails: ((CharacterFull) -> ())?
 
     init(viewModel: CharacterViewModel) {
         self.viewModel = viewModel
@@ -51,6 +52,7 @@ final class CharacterViewController: UIViewController {
     private func setupUI() {
         view.backgroundColor = .white
         view.addSubview(tableView)
+        imagePicker.delegate = self
 
         setupNavigationBar()
         setupTableView()
@@ -62,7 +64,7 @@ final class CharacterViewController: UIViewController {
         navigationItem.rightBarButtonItem = barButtonItem
 
         let backButton = UIButton(type: .system)
-        backButton.setImage(UIImage(named: "arrowBackIcon"), for: .normal)//?.withRenderingMode(.alwaysOriginal), for: .normal)
+        backButton.setImage(UIImage(named: "arrowBackIcon"), for: .normal)
         backButton.setTitle("GO BACK", for: .normal)
         backButton.setTitleColor(.black, for: .normal)
         backButton.titleLabel?.font = UIFont.systemFont(ofSize: 16)
@@ -126,16 +128,15 @@ final class CharacterViewController: UIViewController {
         let authorizationStatus = AVCaptureDevice.authorizationStatus(for: .video)
         switch authorizationStatus {
         case .notDetermined:
-            AVCaptureDevice.requestAccess(for: .video) { granted in
+            AVCaptureDevice.requestAccess(for: .video) { [weak self] granted in
                 if granted {
-                    // Open camera to take a photo
+                    self?.openCamera()
                 } else {
                     // Dismiss the alert
                 }
             }
         case .authorized:
-            print()
-            // Open camera to take a photo
+            openCamera()
         case .denied, .restricted:
             if let settingsURL = URL(string: UIApplication.openSettingsURLString) {
                 if UIApplication.shared.canOpenURL(settingsURL) {
@@ -152,9 +153,9 @@ final class CharacterViewController: UIViewController {
         switch authorizationStatus {
         case .notDetermined:
             // Request access if not determined
-            PHPhotoLibrary.requestAuthorization { status in
+            PHPhotoLibrary.requestAuthorization { [weak self] status in
                 if status == .authorized {
-                    // Open gallery to choose a photo
+                    self?.openGallery()
                 } else {
                     // Dismiss the alert
                 }
@@ -166,8 +167,7 @@ final class CharacterViewController: UIViewController {
                 }
             }
         case .authorized, .limited:
-            print()
-            // Open gallery to choose a photo
+            openGallery()
         @unknown default:
             print("Unknown Photo Library authorization status")
         }
@@ -190,13 +190,45 @@ extension CharacterViewController: UITableViewDataSource {
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: CharacterCell.reuseIdentifier, for: indexPath) as? CharacterCell,
-              let image = viewModel.character.image.image else {
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: CharacterCell.reuseIdentifier, for: indexPath) as? CharacterCell else {
             return UITableViewCell(frame: .zero)
         }
 
         cell.selectionStyle = .none
-        cell.configure(with: viewModel.cellData[indexPath.row], image: image)
+        cell.configure(with: viewModel.cellData[indexPath.row])
         return cell
+    }
+}
+
+extension CharacterViewController: UIImagePickerControllerDelegate {
+
+    func openGallery() {
+        imagePicker.allowsEditing = false
+        imagePicker.sourceType = UIImagePickerController.SourceType.photoLibrary
+        present(imagePicker, animated: true)
+    }
+
+    func openCamera() {
+        if UIImagePickerController.isSourceTypeAvailable(UIImagePickerController.SourceType.camera) {
+            imagePicker.allowsEditing = false
+            imagePicker.sourceType = UIImagePickerController.SourceType.camera
+            imagePicker.cameraCaptureMode = .photo
+            present(imagePicker, animated: true)
+        } else {
+            print("Error!!@!@!@")
+        }
+    }
+
+    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        dismiss(animated: true)
+    }
+
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        guard let image = info[UIImagePickerController.InfoKey.originalImage] as? UIImage,
+              let imageData = image.data else { return }
+
+        viewModel.updateCharacterPhoto(with: imageData)
+        headerView?.updateImage(with: image)
+        dismiss(animated: true)
     }
 }

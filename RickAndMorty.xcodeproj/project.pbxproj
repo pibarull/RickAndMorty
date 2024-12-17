@@ -34,7 +34,6 @@
 		3B9377E32CEB76AA008C50FA /* TabBarCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9377E22CEB76AA008C50FA /* TabBarCoordinator.swift */; };
 		3B9377E62CEB76EB008C50FA /* TabBarAssembly.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9377E52CEB76EB008C50FA /* TabBarAssembly.swift */; };
 		3B9377E82CEB7781008C50FA /* TabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9377E72CEB7781008C50FA /* TabBarController.swift */; };
-		3BD25A462CEB990D0054A681 /* EpisodesCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BD25A452CEB990D0054A681 /* EpisodesCoordinator.swift */; };
 		3BD25A4A2CEB99D60054A681 /* EpisodesAssembly.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BD25A492CEB99D60054A681 /* EpisodesAssembly.swift */; };
 		3BD25A4C2CEB9A0B0054A681 /* CharacterAssembly.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BD25A4B2CEB9A0B0054A681 /* CharacterAssembly.swift */; };
 		3BD25A4E2CEB9A4E0054A681 /* CharacterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BD25A4D2CEB9A4E0054A681 /* CharacterViewController.swift */; };
@@ -104,7 +103,6 @@
 		3B9377E22CEB76AA008C50FA /* TabBarCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabBarCoordinator.swift; sourceTree = "<group>"; };
 		3B9377E52CEB76EB008C50FA /* TabBarAssembly.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabBarAssembly.swift; sourceTree = "<group>"; };
 		3B9377E72CEB7781008C50FA /* TabBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabBarController.swift; sourceTree = "<group>"; };
-		3BD25A452CEB990D0054A681 /* EpisodesCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EpisodesCoordinator.swift; sourceTree = "<group>"; };
 		3BD25A492CEB99D60054A681 /* EpisodesAssembly.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EpisodesAssembly.swift; sourceTree = "<group>"; };
 		3BD25A4B2CEB9A0B0054A681 /* CharacterAssembly.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CharacterAssembly.swift; sourceTree = "<group>"; };
 		3BD25A4D2CEB9A4E0054A681 /* CharacterViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CharacterViewController.swift; sourceTree = "<group>"; };
@@ -212,7 +210,6 @@
 			children = (
 				3B9377CC2CE9217C008C50FA /* AppCoordinator.swift */,
 				3B9377E22CEB76AA008C50FA /* TabBarCoordinator.swift */,
-				3BD25A452CEB990D0054A681 /* EpisodesCoordinator.swift */,
 				3B9377CE2CE92190008C50FA /* Coordinator.swift */,
 				3B9377D02CE92D84008C50FA /* LaunchCoordinator.swift */,
 			);
@@ -433,7 +430,6 @@
 				3BD25A4E2CEB9A4E0054A681 /* CharacterViewController.swift in Sources */,
 				3B9377D82CEA3B00008C50FA /* LaunchAssembly.swift in Sources */,
 				3BD25A5A2CECCCED0054A681 /* LoadingView.swift in Sources */,
-				3BD25A462CEB990D0054A681 /* EpisodesCoordinator.swift in Sources */,
 				3BD25A5D2CECCDBF0054A681 /* Character.swift in Sources */,
 				3B9377DA2CEA3B7B008C50FA /* Dependencies.swift in Sources */,
 				3B4F08E92D08B65200DD35B0 /* CharacterViewModel.swift in Sources */,

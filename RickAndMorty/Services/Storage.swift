@@ -24,22 +24,7 @@ final class Storage {
         self.favouriteEpisodes = fetchFavourites()
     }
 
-    func addFavourite(by episodeId: Int) {
-        episodes.first(where: { $0.id == episodeId })?.isFavourite = true
-        if !favouriteEpisodes.contains(where: { $0.id == episodeId }) {
-            favouriteEpisodes.append(contentsOf: episodes.filter({ $0.id == episodeId }))
-        }
-    }
-
-    func removeFavourite(by episodeId: Int) {
-        episodes.first(where: { $0.id == episodeId })?.isFavourite = false
-        favouriteEpisodes.removeAll(where: { $0.id == episodeId })
-    }
-
-    func getFavouriteEpisodes() -> [EpisodeFull] {
-        return favouriteEpisodes
-    }
-
+    // Private
     private func fetchFavourites() -> [EpisodeFull] {
         if let data = UserDefaults.standard.data(forKey: favouriteEpisodesKey) {
             do {
@@ -61,6 +46,40 @@ final class Storage {
             UserDefaults.standard.set(data, forKey: favouriteEpisodesKey)
         } catch {
             print("Unable to Encode Array of EpisodeFull (\(error))")
+        }
+    }
+
+    // Public
+    func addFavourite(by episodeId: Int) {
+        episodes.first(where: { $0.id == episodeId })?.isFavourite = true
+        if !favouriteEpisodes.contains(where: { $0.id == episodeId }) {
+            favouriteEpisodes.append(contentsOf: episodes.filter({ $0.id == episodeId }))
+        }
+    }
+
+    func removeFavourite(by episodeId: Int) {
+        episodes.first(where: { $0.id == episodeId })?.isFavourite = false
+        favouriteEpisodes.removeAll(where: { $0.id == episodeId })
+    }
+
+    func getFavouriteEpisodes() -> [EpisodeFull] {
+        return favouriteEpisodes
+    }
+
+    func updatePhoto(for characterId: Int, with image: Data) {
+        let episodesToUpdate = episodes.filter{ $0.selectedCharacter?.id == characterId }
+        episodesToUpdate.forEach { episode in
+            if let character = episode.selectedCharacter, let image = image.image {
+                let updatedCharacter = CharacterFull(character: character, image: image)
+                episode.selectedCharacter = updatedCharacter
+            }
+        }
+        let favouriteEpisodesToUpdate = favouriteEpisodes.filter{ $0.selectedCharacter?.id == characterId }
+        favouriteEpisodesToUpdate.forEach { episode in
+            if let character = episode.selectedCharacter, let image = image.image {
+                let updatedCharacter = CharacterFull(character: character, image: image)
+                episode.selectedCharacter = updatedCharacter
+            }
         }
     }
 

@@ -36,4 +36,8 @@ final class CharacterViewModel {
 
         return cellData
     }
+
+    func updateCharacterPhoto(with image: Data) {
+        storage.updatePhoto(for: character.id, with: image)
+    }
 }
