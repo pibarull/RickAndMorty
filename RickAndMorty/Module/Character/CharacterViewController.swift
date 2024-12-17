@@ -203,17 +203,25 @@ extension CharacterViewController: UITableViewDataSource {
 extension CharacterViewController: UIImagePickerControllerDelegate {
 
     func openGallery() {
-        imagePicker.allowsEditing = false
-        imagePicker.sourceType = UIImagePickerController.SourceType.photoLibrary
-        present(imagePicker, animated: true)
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+
+            imagePicker.allowsEditing = false
+            imagePicker.sourceType = UIImagePickerController.SourceType.photoLibrary
+            present(imagePicker, animated: true)
+        }
     }
 
     func openCamera() {
         if UIImagePickerController.isSourceTypeAvailable(UIImagePickerController.SourceType.camera) {
-            imagePicker.allowsEditing = false
-            imagePicker.sourceType = UIImagePickerController.SourceType.camera
-            imagePicker.cameraCaptureMode = .photo
-            present(imagePicker, animated: true)
+            DispatchQueue.main.async { [weak self] in
+                guard let self else { return }
+
+                imagePicker.allowsEditing = false
+                imagePicker.sourceType = UIImagePickerController.SourceType.camera
+                imagePicker.cameraCaptureMode = .photo
+                present(imagePicker, animated: true)
+            }
         } else {
             print("Error!!@!@!@")
         }
